@@ -43,7 +43,7 @@ jobs:
           printf '%s' "$BADGING" | grep -Fq "uses-gl-es: '0x20000'"
           for required in '.BlueMeridianDreamService' 'android.permission.BIND_DREAM_SERVICE' \
             'android.service.dreams.DreamService' 'android.service.dream' \
-            'com.jeremykenedy.bluemeridian.SettingsActivity' \
+            '.SettingsActivity' \
             'com.jeremykenedy.bluemeridian.settings'; do
             printf '%s' "$MANIFEST" | grep -Fq "$required"
           done

@@ -8,6 +8,10 @@ The screenshots in `../art/screenshots/` are direct 1920x1080 emulator captures 
 
 ## Checks still required for broader device claims
 
-- Physical Fire TV activation, remote exit, sleep/wake persistence and long-duration rendering.
-- Physical Android TV and Google TV service discovery and activation.
-- Native 4K composition, frame pacing under sustained use, thermal behavior and idle power.
+| Device | Status | Follow-up |
+| --- | --- | --- |
+| Android TV emulator, API 31, 1920x1080 | Preview and settings tested. System-triggered dream activation unavailable in this emulator. | Verify activation on a device with a screensaver settings activity. |
+| Physical Fire TV | Untested; no physical device was available for this release. | If you have a Fire TV, test selection, idle activation, remote exit, sleep/wake persistence and extended playback, then report the model, Fire OS version and results. |
+| Physical Android TV | Untested; no physical device was available for this release. | If you have an Android TV, test service discovery, selection, idle activation, remote exit and extended playback, then report the model, Android version and results. |
+| Physical Google TV | Untested; no physical device was available for this release. | If you have a Google TV, test service discovery, selection, idle activation, remote exit and extended playback, then report the model, Android version and results. |
+| Native 4K and sustained display behavior | Untested on a 4K display. | Test native 4K composition, frame pacing, thermal behavior and idle power on supported hardware, then report the device model, display mode and observations. |
