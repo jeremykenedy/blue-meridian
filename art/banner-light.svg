@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200" role="img" aria-labelledby="title desc">
+  <title id="title">Blue Meridian</title>
+  <desc id="desc">A continuously animated Earth screensaver with no ads, analytics or tracking.</desc>
+  <defs><radialGradient id="globe" cx="36%" cy="29%"><stop stop-color="#76b6e7"/><stop offset=".58" stop-color="#2469a4"/><stop offset="1" stop-color="#07182e"/></radialGradient></defs>
+  <rect width="800" height="200" rx="16" fill="#fff" stroke="#e5e7eb"/>
+  <text x="40" y="78" fill="#0f172a" font-family="system-ui,-apple-system,'Segoe UI',sans-serif" font-size="40" font-weight="700" letter-spacing="-.5">Blue Meridian</text>
+  <text x="42" y="108" fill="#475569" font-family="system-ui,-apple-system,'Segoe UI',sans-serif" font-size="14">An animated Earth view with no ads, analytics or tracking</text>
+  <g font-family="system-ui,-apple-system,'Segoe UI',sans-serif" font-size="10" font-weight="500" text-anchor="middle">
+    <rect x="40" y="130" width="90" height="22" rx="11" fill="#eff6ff" stroke="#93c5fd" stroke-width=".8"/><text x="85" y="144" fill="#1e40af">Android TV</text>
+    <rect x="138" y="130" width="78" height="22" rx="11" fill="#f0fdf4" stroke="#86efac" stroke-width=".8"/><text x="177" y="144" fill="#166534">Fire TV</text>
+    <rect x="224" y="130" width="84" height="22" rx="11" fill="#f5f3ff" stroke="#c4b5fd" stroke-width=".8"/><text x="266" y="144" fill="#6d28d9">Google TV</text>
+  </g>
+  <g transform="translate(610 25)">
+    <circle cx="78" cy="75" r="66" fill="url(#globe)" stroke="#65a9dc" stroke-width="3"/>
+    <path d="M32 55l14-11 15 3 7 13-13 9-18-4zM55 75l15-8 15 7 5 13-12 7-5 19-13-5-2-18-9-6zM82 51l15-6 17 11 7 15-17 5-12-9zM92 91l15-6 12 8-7 16-16 7-7-12z" fill="#759469"/>
+    <ellipse cx="78" cy="75" rx="66" ry="66" fill="none" stroke="#a5ddff" stroke-opacity=".65" stroke-width="1"/>
+    <g fill="#64748b"><circle cx="3" cy="24" r="1.4"/><circle cx="151" cy="35" r="1.1"/><circle cx="145" cy="131" r="1.2"/><circle cx="15" cy="127" r="1"/></g>
+  </g>
+</svg>
