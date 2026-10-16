@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-    <a href="https://github.com/jeremykenedy"><img src="https://img.shields.io/github/followers/jeremykenedy?label=Follow&style=social" alt="Follow Jeremy Kenedy on GitHub"></a>
+    <a href="https://github.com/jeremykenedy"><img src="https://img.shields.io/badge/Follow-jeremykenedy-181717?logo=github&style=social" alt="Follow Jeremy Kenedy on GitHub"></a>
     <a href="https://github.com/jeremykenedy/blue-meridian" title="Open the repository and click Star"><img src="https://img.shields.io/badge/Star-this%20repo-yellow?logo=github&style=social" alt="Star this repository"></a>
     <a href="https://github.com/sponsors/jeremykenedy"><img src="https://img.shields.io/badge/Sponsor-jeremykenedy-EA4AAA?logo=githubsponsors&logoColor=white" alt="Sponsor on GitHub"></a>
 </p>
