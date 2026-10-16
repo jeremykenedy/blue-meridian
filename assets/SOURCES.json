@@ -1,0 +1,41 @@
+[
+  {
+    "url": "https://assets.science.nasa.gov/content/dam/science/esd/eo/images/bmng/bmng-base/july/world.200407.3x5400x2700.jpg",
+    "resolved_url": "https://assets.science.nasa.gov/content/dam/science/esd/eo/images/bmng/bmng-base/july/world.200407.3x5400x2700.jpg",
+    "sha256": "f55226d46d27e05511f2118dc6aa24f5dbf9b6b2cddc87cc6e0e7dd067c00b11",
+    "bytes": 1617810,
+    "file": "res/drawable-nodpi/earth_surface.jpg",
+    "title": "NASA Blue Marble Next Generation, July 2004, cloud-free base map",
+    "credit": "Reto Stockli, NASA Earth Observatory / NASA GSFC",
+    "source_page": "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-map/",
+    "usage_guidelines": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+    "modifications": "Resized to power-of-two dimensions, converted to JPEG, metadata removed; used as an animated globe texture.",
+    "shipped_sha256": "77f3a1bc782946ed2167dd92a4368f3cab608b7f6d7bd95ae96fad77f6643850"
+  },
+  {
+    "url": "https://assets.science.nasa.gov/content/dam/science/esd/eo/images/imagerecords/79000/79765/dnb_land_ocean_ice.2012.3600x1800.jpg",
+    "resolved_url": "https://assets.science.nasa.gov/content/dam/science/esd/eo/images/imagerecords/79000/79765/dnb_land_ocean_ice.2012.3600x1800.jpg",
+    "sha256": "373e5a08c9f378a2ce6320214a613148e4b1e3946b3f39a516c9093b76cb7124",
+    "bytes": 794479,
+    "file": "res/drawable-nodpi/earth_night.jpg",
+    "title": "NASA Black Marble 2012 annual night-light composite",
+    "credit": "NASA Earth Observatory, NOAA National Geophysical Data Center, Suomi NPP VIIRS",
+    "source_page": "https://science.nasa.gov/earth/earth-observatory/earth-at-night/maps/",
+    "usage_guidelines": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+    "modifications": "Resized to power-of-two dimensions, converted to JPEG, metadata removed; used as an animated globe texture.",
+    "shipped_sha256": "f4e9db22529db09f361587dcd6588b7db3991c26dc4e16648311df7c2db6d945"
+  },
+  {
+    "url": "https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57747/cloud_combined_2048.jpg",
+    "resolved_url": "https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57747/cloud_combined_2048.jpg",
+    "sha256": "daddaad84d7a33bbbc86cdda3f591099f57cee8607b7bcf3b67eb7e4f7a1c793",
+    "bytes": 829367,
+    "file": "res/drawable-nodpi/earth_clouds.jpg",
+    "title": "NASA Blue Marble Clouds 2002",
+    "credit": "Reto Stockli, NASA GSFC; MODIS Atmosphere Group",
+    "source_page": "https://visibleearth.nasa.gov/images/57747/blue-marble-clouds/77558l",
+    "usage_guidelines": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+    "modifications": "Resized to power-of-two dimensions, converted to JPEG, metadata removed; used as an animated globe texture.",
+    "shipped_sha256": "027da798b9a8e795d4c1dcaca20d4be2ae8620a96302bcef877c0a2db5c7b0bd"
+  }
+]

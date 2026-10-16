@@ -39,7 +39,7 @@ jobs:
           BADGING=$("$AAPT" dump badging build/blue-meridian.apk)
           MANIFEST=$("$AAPT" dump xmltree build/blue-meridian.apk AndroidManifest.xml)
           PERMISSIONS=$("$AAPT" dump permissions build/blue-meridian.apk)
-          printf '%s' "$BADGING" | grep -Fq "name='com.jeremykenedy.bluemeridian' versionCode='1' versionName='1.0.0'"
+          printf '%s' "$BADGING" | grep -Fq "name='com.jeremykenedy.bluemeridian' versionCode='2' versionName='1.0.1'"
           printf '%s' "$BADGING" | grep -Fq "uses-gl-es: '0x20000'"
           for required in '.BlueMeridianDreamService' 'android.permission.BIND_DREAM_SERVICE' \
             'android.service.dreams.DreamService' 'android.service.dream' \
@@ -48,6 +48,9 @@ jobs:
             printf '%s' "$MANIFEST" | grep -Fq "$required"
           done
           "$AAPT" list build/blue-meridian.apk | grep -Fq 'screensaver_preview.jpg'
+          for notice in assets/NOTICE assets/LICENSE assets/SOURCES.json; do
+            "$AAPT" list build/blue-meridian.apk | grep -Fq "$notice"
+          done
           if printf '%s' "$PERMISSIONS" | grep -q android.permission.INTERNET; then
             echo 'The screensaver must not request network access.' >&2
             exit 1
