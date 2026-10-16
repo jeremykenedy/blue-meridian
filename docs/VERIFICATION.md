@@ -1,17 +1,36 @@
 # Device verification
 
-## Android TV emulator
+## Version 1.0.1 candidate
 
-The renderer and settings were tested on an Android TV emulator with model `sdk_google_atv64_arm64`, Android 12 (API 31), and 1920x1080 logical output. The APK was installed with ADB, the native settings activity opened, D-pad input changed the star density, the settings schema and updated values were queried through the exported provider, and the OpenGL preview was captured after startup. The Android service query lists Blue Meridian as a DreamService. The emulator has no screensaver settings activity, so system-triggered dream activation could not be exercised. This verifies the preview and settings on that emulator only; it does not establish physical Fire TV, physical Google TV, automatic idle activation on other vendors, native 4K composition or sustained thermal behavior.
+Verified October 15, 2026 on the Android TV API 31 emulator `fire-tv-ui-final-verification`, model `sdk_google_atv64_arm64`, with 1920x1080 output and host GPU rendering. This documents the candidate before publication. Physical-device verification remains pending.
 
-The screenshots in `../art/screenshots/` are direct 1920x1080 emulator captures from October 8, 2026. The scene capture came from the running preview after eight seconds of startup; the settings capture came directly from the settings activity. Both were taken with `adb -s emulator-5562 exec-out screencap -p`. The in-app dream preview is resized from the same scene capture to 384x216. The scene contains no text or overlays. The emulator image has no resolvable `android.settings.DREAM_SETTINGS` activity, so system-triggered DreamService activation and exit were not verified there. The secure screensaver component and enabled value remained unchanged.
+The signed APK preserves the package and signing certificate of the published 1.0.0 release. It declares version 1.0.1, version code 2, Android API 23 minimum and OpenGL ES 2.0. The manifest exposes the expected DreamService and settings provider and requests no Internet permission. The APK bundles all three NASA textures, source provenance, NOTICE and license.
 
-## Checks still required for broader device claims
+## Rendering regression
 
-| Device | Status | Follow-up |
+The native lighting check reproduced a visibly black globe on the published 1.0.0 APK: after 24 seconds of fast rotation, mean inner-disc luminance fell to 4.45 and no sampled pixels exceeded the daylight threshold. The same check passes with the new renderer at 8, 24 and 40 seconds. Mean luminance was 93.09, 77.85 and 81.80 respectively; the visible-daylight fraction remained above 0.91. These thresholds detect the lost-daylight regression; they do not establish photographic accuracy.
+
+Direct native captures show the Pacific and western hemisphere with clouds, and Africa, Arabia and India with clouds disabled. North remains up, mapped city lights remain visible on the night side, oceans remain dark, and the atmosphere follows a narrow sunlit limb. The images in `art/screenshots/` are unretouched ADB captures. The embedded 384x216 preview derives from `earth-preview.png`. The release capture comes from the final signed APK.
+
+## Settings and lifecycle
+
+D-pad input changed all seven native controls: star density, spin speed, camera motion, atmosphere, night lights, clouds and randomize-all. Saved values survived a force-stop and restart. Invalid values were rejected for every setting. Both settings and lifecycle checks restored all seven original preferences.
+
+Two Home, resume and Back cycles passed on the candidate and were repeated after the final signed APK was installed. No fatal exception, fatal signal, shader compilation error or OpenGL invalid-operation error appeared in the check window. Preview launches used activity reordering to avoid creating duplicate preview instances in the test harness. The emulator's selected Backdrop screensaver and enabled value remained unchanged.
+
+A 15-second native screen recording contained 422 frames, approximately 28.17 frames per second, with median frame spacing 33.12 ms and 95th percentile 66.02 ms. This measures the captured emulator stream under recording load, not physical GPU presentation, power use or thermal performance. A separate five-second SurfaceFlinger sample without screen recording contained 81 presentation timestamps, with median spacing 34.2 ms, 95th percentile 224 ms and maximum 857 ms. This exposes long stalls on the busy host, so smooth playback has not passed the release gate. Guest process PSS was about 21 MB during the sample; host GPU allocations are outside that number.
+
+## Automated checks
+
+Host installer and settings tests pass. Installer coverage is 226 of 226 statements and 80 of 80 branches. Pure Java settings logic coverage is 37 of 37 lines and 44 of 44 branches, enforced with coverage-ratio limits. These coverage figures exclude Android activities, lifecycle and GLSL, which require native verification. Formatting, documentation, privacy and style checks pass locally. Remote CI results are checked separately before merge.
+
+## Remaining device gates
+
+| Target | Candidate status | Required verification |
 | --- | --- | --- |
-| Android TV emulator, API 31, 1920x1080 | Preview and settings tested. System-triggered dream activation unavailable in this emulator. | Verify activation on a device with a screensaver settings activity. |
-| Physical Fire TV | Untested; no physical device was available for this release. | If you have a Fire TV, test selection, idle activation, remote exit, sleep/wake persistence and extended playback, then report the model, Fire OS version and results. |
-| Physical Android TV | Untested; no physical device was available for this release. | If you have an Android TV, test service discovery, selection, idle activation, remote exit and extended playback, then report the model, Android version and results. |
-| Physical Google TV | Untested; no physical device was available for this release. | If you have a Google TV, test service discovery, selection, idle activation, remote exit and extended playback, then report the model, Android version and results. |
-| Native 4K and sustained display behavior | Untested on a 4K display. | Test native 4K composition, frame pacing, thermal behavior and idle power on supported hardware, then report the device model, display mode and observations. |
+| Android TV API 31 emulator | Preview, seven controls, persistence, invalid settings and Home/Back resume verified | Automatic idle activation is unavailable through this emulator's system settings. |
+| Physical Fire TV | Pending | Actual screensaver selection, moving output, idle activation, remote exit, sleep/wake persistence and sustained playback. |
+| Physical Android TV and Google TV | Pending | Discovery, selection, idle activation, remote exit and sustained playback. |
+| Native 4K and sustained operation | Pending | Native display composition, frame pacing, thermal behavior and idle power on supported hardware. |
+
+Historical 1.0.0 verification used an API 31 emulator on October 8, 2026. Its earlier screenshots and rendering observations do not validate the replacement renderer.
