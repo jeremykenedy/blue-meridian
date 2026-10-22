@@ -12,7 +12,7 @@ The October 22 follow-up adds a remote-readable Credits and licenses button at t
 
 The frozen follow-up APK is 2,565,321 bytes, SHA-256 `8ed100da7f1d152f6c83eb0cb337a57fefeee3915932d1de4e69e3b8f9883395`. All 12 original non-DEX APK entries, including the NASA textures and notices, and all 11 compiled classes outside Settings are byte-identical to a build of the recovered feature source. Host settings and installer tests, coverage, documentation and privacy checks pass. Coverage remains limited to the pure settings logic and installer; the new Android dialog requires native validation.
 
-The exact follow-up APK still needs Credits scrolling, Preview/Back, Dream activation, seven-preference preservation and physical sustained-motion checks. The earlier captures below describe the recovered renderer, not validation of the new Settings dialog. No physical smoothness or release completion is claimed.
+The exact follow-up APK passed the native credits and navigation checks below. Physical sustained-motion checks remain pending. The earlier captures below describe the recovered renderer, not validation of the new Settings dialog. No physical smoothness or release completion is claimed.
 
 ## Rendering regression
 
@@ -42,3 +42,19 @@ Host installer and settings tests pass. Installer coverage is 226 of 226 stateme
 | Native 4K and sustained operation | Pending | Native display composition, frame pacing, thermal behavior and idle power on supported hardware. |
 
 Historical 1.0.0 verification used an API 31 emulator on October 8, 2026. Its earlier screenshots and rendering observations do not validate the replacement renderer.
+
+## October 22 exact credits candidate
+
+Android API 34 emulator checks used the frozen APK hash above with actual 1920x1080 captures. D-pad navigation reached Credits and licenses, scrolled through the full NOTICE and license to its end, and selected the positive Close button. Preview returned to Settings with Back; the actual DreamService bound and exited with Back. All eight saved system keys and the original screensaver selection were unchanged, and the emulator returned Home. No app data was cleared or uninstalled.
+
+This app was not installed on the shared emulator before the test. Its 7 exposed values were captured after installation and restored exactly; this does not prove pre-upgrade data retention. These are native credits/lifecycle checks, not physical smoothness, automatic idle, 4K or thermal verification.
+
+[Sanitized capture provenance](../art/screenshots/credits-api34.json) records the artifact and screenshot hashes.
+
+<table>
+  <tr>
+    <td><a href="../art/screenshots/credits-api34-credits.png"><img src="../art/screenshots/credits-api34-credits.png" alt="Full offline credits and notices" width="320"></a></td>
+    <td><a href="../art/screenshots/credits-api34-license-end.png"><img src="../art/screenshots/credits-api34-license-end.png" alt="End of the bundled Apache license" width="320"></a></td>
+    <td><a href="../art/screenshots/credits-api34-settings.png"><img src="../art/screenshots/credits-api34-settings.png" alt="Current native settings" width="320"></a></td>
+  </tr>
+</table>
