@@ -6,6 +6,14 @@ Verified October 15, 2026 on the Android TV API 31 emulator `fire-tv-ui-final-ve
 
 The signed APK preserves the package and signing certificate of the published 1.0.0 release. It declares version 1.0.1, version code 2, Android API 23 minimum and OpenGL ES 2.0. The manifest exposes the expected DreamService and settings provider and requests no Internet permission. The APK bundles all three NASA textures, source provenance, NOTICE and license.
 
+## Offline credits follow-up
+
+The October 22 follow-up adds a remote-readable Credits and licenses button at the end of Settings. Its scrollable offline dialog reads the full bundled NASA NOTICE and Apache license. No new asset, permission, dependency, renderer or setting was introduced. The package remains version 1.0.1/code 2 with its existing signing certificate.
+
+The frozen follow-up APK is 2,565,321 bytes, SHA-256 `8ed100da7f1d152f6c83eb0cb337a57fefeee3915932d1de4e69e3b8f9883395`. All 12 original non-DEX APK entries, including the NASA textures and notices, and all 11 compiled classes outside Settings are byte-identical to a build of the recovered feature source. Host settings and installer tests, coverage, documentation and privacy checks pass. Coverage remains limited to the pure settings logic and installer; the new Android dialog requires native validation.
+
+The exact follow-up APK still needs Credits scrolling, Preview/Back, Dream activation, seven-preference preservation and physical sustained-motion checks. The earlier captures below describe the recovered renderer, not validation of the new Settings dialog. No physical smoothness or release completion is claimed.
+
 ## Rendering regression
 
 The native lighting check reproduced a visibly black globe on the published 1.0.0 APK: after 24 seconds of fast rotation, mean inner-disc luminance fell to 4.45 and no sampled pixels exceeded the daylight threshold. The same check passes with the new renderer at 8, 24 and 40 seconds. Mean luminance was 93.09, 77.85 and 81.80 respectively; the visible-daylight fraction remained above 0.91. These thresholds detect the lost-daylight regression; they do not establish photographic accuracy.
