@@ -22,11 +22,20 @@ final class BlueMeridianSceneView extends GLSurfaceView {
     private static final float[] VERTICES = {-1f, -1f, 1f, -1f, -1f, 1f, 1f, 1f};
     private static final String VERTEX_SHADER =
             "attribute vec2 aPosition; varying vec2 vUv; void main(){vUv=aPosition*0.5+0.5;gl_Position=vec4(aPosition,0.0,1.0);}";
+    // Longitude derivatives must stay continuous when the repeating map wraps.
     private static final String FRAGMENT_SHADER =
             "precision highp float;" +
             "varying vec2 vUv;" +
             "uniform sampler2D uEarth,uNight,uClouds;" +
             "uniform float uTime,uAspect,uSpin,uCamera,uStars,uAtmosphere,uNightLights,uCloudsEnabled;" +
+            "\n#ifdef WRAPPED_MIPMAPS\n" +
+            "vec4 globeTexture(sampler2D image,vec2 uv){" +
+            "vec2 dx=dFdx(uv),dy=dFdy(uv);" +
+            "dx.x-=floor(dx.x+0.5);dy.x-=floor(dy.x+0.5);" +
+            "return texture2DGradEXT(image,uv,dx,dy);}" +
+            "\n#else\n" +
+            "vec4 globeTexture(sampler2D image,vec2 uv){return texture2D(image,uv);}" +
+            "\n#endif\n" +
             "float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123);}" +
             "void main(){" +
             "vec2 starPosition=gl_FragCoord.xy+vec2(uTime*0.14,uTime*0.08);vec2 cell=floor(starPosition/6.0);float star=hash(cell);" +
@@ -45,7 +54,7 @@ final class BlueMeridianSceneView extends GLSurfaceView {
             "float angle=uTime*uSpin;float c=cos(angle),s=sin(angle);" +
             "vec3 body=vec3(c*n.x+s*n.z,n.y,-s*n.x+c*n.z);" +
             "vec2 uv=vec2(fract(atan(body.x,body.z)/6.2831853+0.5),0.5-asin(clamp(body.y,-1.0,1.0))/3.14159265);" +
-            "vec3 surface=texture2D(uEarth,uv).rgb;" +
+            "vec3 surface=globeTexture(uEarth,uv).rgb;" +
             "float signedDay=dot(n,sun);float day=max(signedDay,0.0);" +
             "float illumination=0.035+1.25*pow(day,0.8);" +
             "vec3 color=pow(surface,vec3(2.2))*illumination;" +
@@ -53,11 +62,11 @@ final class BlueMeridianSceneView extends GLSurfaceView {
             "color+=vec3(0.0015,0.006,0.016)*water*day;vec3 halfway=normalize(sun+vec3(0.0,0.0,1.0));" +
             "color+=vec3(0.78,0.88,1.0)*pow(max(dot(n,halfway),0.0),95.0)*water*0.16;" +
             "vec2 cloudUv=vec2(fract(uv.x+uTime*0.00035),uv.y);" +
-            "float cloud=texture2D(uClouds,cloudUv).r*uCloudsEnabled;" +
-            "float shadow=texture2D(uClouds,cloudUv+sun.xy*0.003).r*uCloudsEnabled;" +
+            "float cloud=globeTexture(uClouds,cloudUv).r*uCloudsEnabled;" +
+            "float shadow=globeTexture(uClouds,cloudUv+sun.xy*0.003).r*uCloudsEnabled;" +
             "color*=1.0-shadow*0.24;" +
             "color=mix(color,vec3(0.93,0.96,1.0)*illumination,cloud*0.88);" +
-            "vec3 lights=texture2D(uNight,uv).rgb;float emission=max(lights.r-lights.b*0.9,0.0);" +
+            "vec3 lights=globeTexture(uNight,uv).rgb;float emission=max(lights.r-lights.b*0.9,0.0);" +
             "float night=1.0-smoothstep(-0.12,0.12,signedDay);" +
             "color+=pow(lights,vec3(2.2))*emission*night*uNightLights*(1.0-cloud*0.8)*2.0;" +
             "float rim=pow(1.0-nz,4.5)*uAtmosphere;" +
@@ -127,10 +136,19 @@ final class BlueMeridianSceneView extends GLSurfaceView {
         public void onSurfaceCreated(GL10 ignored, EGLConfig config) {
             GLES20.glClearColor(0.01f, 0.02f, 0.04f, 1f);
             GLES20.glDisable(GLES20.GL_DEPTH_TEST);
-            program = createProgram(VERTEX_SHADER, FRAGMENT_SHADER);
+            String extensions = " " + GLES20.glGetString(GLES20.GL_EXTENSIONS) + " ";
+            boolean wrappedMipmaps = extensions.contains(" GL_EXT_shader_texture_lod ")
+                    && extensions.contains(" GL_OES_standard_derivatives ");
+            String prefix = wrappedMipmaps
+                    ? "#extension GL_EXT_shader_texture_lod : enable\n"
+                            + "#extension GL_OES_standard_derivatives : enable\n"
+                            + "#define WRAPPED_MIPMAPS\n"
+                    : "";
+            program = createProgram(VERTEX_SHADER, prefix + FRAGMENT_SHADER);
             positionHandle = GLES20.glGetAttribLocation(program, "aPosition");
-            textures = new int[] {loadTexture(R.drawable.earth_surface),
-                    loadTexture(R.drawable.earth_night), loadTexture(R.drawable.earth_clouds)};
+            textures = new int[] {loadTexture(R.drawable.earth_surface, wrappedMipmaps),
+                    loadTexture(R.drawable.earth_night, wrappedMipmaps),
+                    loadTexture(R.drawable.earth_clouds, wrappedMipmaps)};
         }
 
         @Override
@@ -175,7 +193,7 @@ final class BlueMeridianSceneView extends GLSurfaceView {
         }
     }
 
-    private int loadTexture(int resource) {
+    private int loadTexture(int resource, boolean mipmaps) {
         BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
         decodeOptions.inScaled = false;
         decodeOptions.inJustDecodeBounds = true;
@@ -192,12 +210,13 @@ final class BlueMeridianSceneView extends GLSurfaceView {
         int[] textures = new int[1];
         GLES20.glGenTextures(1, textures, 0);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[0]);
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_LINEAR);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER,
+                mipmaps ? GLES20.GL_LINEAR_MIPMAP_LINEAR : GLES20.GL_LINEAR);
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_REPEAT);
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
         android.opengl.GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
-        GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);
+        if (mipmaps) GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);
         bitmap.recycle();
         return textures[0];
     }

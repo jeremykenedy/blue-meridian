@@ -40,15 +40,14 @@ Blue Meridian contains no ads, analytics, tracking, telemetry, crash reporting o
 
 ## Features
 
-- Continuously rotating, shaded Earth rendered with OpenGL ES 2 and detailed NASA satellite imagery.
-- Slow, natural and fast rotation speeds.
-- Still, gentle and sweeping camera movement.
-- Sparse, natural and dense star fields.
-- Optional thin atmosphere, independently drifting satellite clouds, and mapped city lights on the night side.
-- Independent Random choices and an option to randomize all settings on each screensaver start.
-- D-pad friendly settings screen and an app-owned settings provider for host apps.
-- Standalone release installer, updater and uninstaller.
-- No text or watermark in the screensaver scene.
+| Feature | Description | Guide |
+| --- | --- | --- |
+| Satellite Earth | Continuously rotating NASA surface, cloud and night-light composites with a thin atmosphere. | [Rendering](docs/ARCHITECTURE.md) |
+| Scene controls | Rotation speed, camera drift, stars, atmosphere, clouds and city lights, with Random choices. | [Configuration](docs/CONFIGURATION.md) |
+| TV settings | Remote-friendly preview, offline credits and an app-owned settings provider. | [Configuration](docs/CONFIGURATION.md) |
+| Verified installation | Standalone signed-APK installer, updater and removal, plus Toolkit integration. | [Installation](docs/INSTALLATION.md) |
+
+The animated scene has no text or watermark. Camera choices gently move the globe across the frame; they do not simulate orbital flight.
 
 ## Requirements
 
@@ -56,7 +55,7 @@ Blue Meridian contains no ads, analytics, tracking, telemetry, crash reporting o
 - ADB for the command-line installer.
 - Android SDK Platform 36, Build Tools 36.0.0, Java and Python 3 to build from source.
 
-The current automated device check uses an Android TV emulator running Android 12 at 1920x1080. No physical Fire TV or Google TV test is claimed in this release.
+Version 1.0.1 was checked on a physical Fire TV AFTDEC012E running API 30 at 1920x1080, including normal five-minute idle activation, visible animation and remote exit. Android TV API 31 and API 34 emulator checks cover settings and offline credits. Physical Android TV, Google TV and native 4K output remain untested. Volunteers with those devices can report their model, OS/API, display mode and results through the repository issue tracker. See [device verification](docs/VERIFICATION.md).
 
 ## Installation
 
@@ -90,7 +89,7 @@ firetv-set-screensaver --set=blue-meridian
 
 Run `firetv-screensavers --install=blue-meridian` again to update to the latest signed release with checksum verification. Remove the app with `firetv-screensavers --uninstall=blue-meridian --force`. The guided commands explain changes and request confirmation.
 
-The Toolkit also manages available launcher choices, screensaver delays, and supported timer protections. Its Fire TV UI discovers installed Blue Meridian and opens its own settings screen. See the [Toolkit command reference](https://github.com/jeremykenedy/fire-tv-toolkit/blob/main/docs/COMMANDS.md) for device-specific behavior. These controls do not establish physical-device testing for Blue Meridian.
+The Toolkit also manages available launcher choices, screensaver delays, and supported timer protections. Its Fire TV UI discovers installed Blue Meridian and opens its own settings screen. See the [Toolkit command reference](https://github.com/jeremykenedy/fire-tv-toolkit/blob/main/docs/COMMANDS.md) for device-specific behavior. Actual tested hardware and limits are recorded in the device verification guide.
 
 ## Configuration
 
@@ -106,17 +105,17 @@ Open Blue Meridian from the TV launcher and use the remote to choose settings. C
 | Cloud cover | On, Off, Random | On |
 | Randomize all settings at each start | On, Off | Off |
 
-Host apps can read the provider schema and current values from `content://com.jeremykenedy.bluemeridian.settings/schema` and `content://com.jeremykenedy.bluemeridian.settings/settings`. See [configuration](docs/CONFIGURATION.md) for the schema, keys and update contract.
+Host apps can read and update the app-owned settings provider. See [configuration](docs/CONFIGURATION.md) for its schema, paths, keys and update contract.
 
 ## Screenshots
 
-Captures below come from the running Android TV emulator at 1920x1080. They show the animated app preview and the remote-operated settings screen.
+These unretouched captures show version 1.0.1 running on a physical Fire TV at 1920x1080. [Capture provenance](art/screenshots/fire-tv-api30.json) identifies the build and settings.
 
 <table>
   <tr>
-    <td><img src="art/screenshots/earth-release-native-api31.png" alt="Blue Meridian rotating satellite Earth with real cloud patterns and a thin atmosphere"><br>Satellite Earth</td>
-    <td><img src="art/screenshots/earth-clouds-off-native-api31.png" alt="Blue Meridian land and oceans with the cloud layer disabled"><br>Clouds disabled</td>
-    <td><img src="art/screenshots/settings-emulator.png" alt="Blue Meridian settings on Android TV"><br>Settings</td>
+    <td><a href="art/screenshots/earth-fire-tv-api30.png"><img src="art/screenshots/earth-fire-tv-api30.png" alt="Satellite Earth with cloud patterns and a thin atmosphere on Fire TV" width="320"></a></td>
+    <td><a href="art/screenshots/earth-clouds-off-fire-tv-api30.png"><img src="art/screenshots/earth-clouds-off-fire-tv-api30.png" alt="Earth land and oceans with clouds disabled on Fire TV" width="320"></a></td>
+    <td><a href="art/screenshots/settings-fire-tv-api30.png"><img src="art/screenshots/settings-fire-tv-api30.png" alt="Remote-operated Blue Meridian settings on Fire TV" width="320"></a></td>
   </tr>
 </table>
 
@@ -132,7 +131,7 @@ python3 scripts/check-docs.py
 python3 scripts/check-privacy.py
 ```
 
-The coverage gates require 100 percent line and branch coverage for the settings resolver, validation rules and installer logic. Renderer behavior is verified with the emulator and recorded separately. CI builds an unsigned review APK; the signed release artifact is built and checked locally.
+The coverage gates require 100 percent line and branch coverage for the settings resolver, validation rules and installer logic. Renderer behavior is checked natively and recorded separately. CI builds an unsigned review APK; the signed release artifact is built and checked locally.
 
 ## Documentation
 

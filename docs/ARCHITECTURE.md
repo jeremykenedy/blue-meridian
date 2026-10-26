@@ -13,3 +13,5 @@ The renderer uses one full-screen quad and three bundled textures. It requests f
 - `SettingsProvider` publishes a schema and validated read/write preference interface for host apps.
 
 The globe uses NASA archival surface, cloud, and night-light composites, documented in [the media guide](MEDIA.md). It includes no runtime network client, analytics libraries, or external fonts. Surface texture rotation is separate from view-space lighting so visible daylight remains stable through each revolution.
+
+Longitude wraps at the edge of each repeating map. On devices exposing both standard derivatives and explicit texture gradients, the shader unwraps those gradients before mipmap selection. This prevents a blurred vertical line at the longitude boundary. Other GLES 2 devices use bilinear sampling without mipmaps; they do not require either extension. Camera choices apply slow screen-space drift rather than an orbital camera.

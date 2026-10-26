@@ -1,0 +1,41 @@
+{
+  "version": "1.0.1",
+  "versionCode": 2,
+  "artifactSha256": "f554c6f0f927df2b081caf55cc7e989b2a042f37f5709f19f8774f692f67fff1",
+  "device": {
+    "physical": true,
+    "model": "AFTDEC012E",
+    "api": 30,
+    "surface": "1920x1080"
+  },
+  "method": "Unretouched ADB screencap from actual PreviewActivity after 40 seconds; settings capture from same APK. Embedded preview is a 384x216 Lanczos resize of the normal native capture.",
+  "settings": {
+    "normal": {
+      "star_density": "normal",
+      "spin_speed": "natural",
+      "camera_motion": "gentle",
+      "atmosphere": "on",
+      "night_lights": "on",
+      "clouds": "on",
+      "randomize_all": "false"
+    },
+    "cloudsOffOverrides": {
+      "spin_speed": "fast",
+      "camera_motion": "sweeping",
+      "clouds": "off",
+      "randomize_all": "false"
+    }
+  },
+  "captures": {
+    "earth-fire-tv-api30.png": "32e8fbe4c354edbf3873a4dd0fa18c1e4b12603219c799a756003262554b614c",
+    "earth-clouds-off-fire-tv-api30.png": "20d2223be5992d4e0459cb233f82ec0195f09aaf28b130eb79c0a84eba3d5b4a",
+    "settings-fire-tv-api30.png": "e44866b03501b678c40e9d5bb83ff458097c1851d17006ee958c86c602aea052"
+  },
+  "preview": {
+    "path": "res/drawable-nodpi/screensaver_preview.jpg",
+    "sha256": "fb8c17bdb3ed3f19a37590e51495cb729ef80ce64cf0f93cd382decf53241b64"
+  },
+  "qualification": "Final signed artifact installed hash, 20-second native Preview recording, D-pad Credits, Back/Home and exact configuration/external cleanup passed. classes.dex is byte-identical; only embedded preview and signature metadata differ from the source capture artifact.",
+  "finalArtifactSha256": "7f3b575f45d7afa5ca68ff8510d84f5b42c6ac6c3c21903628898f6a5dff5ec2",
+  "finalArtifactBytes": 2569417
+}
