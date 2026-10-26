@@ -8,8 +8,8 @@ ANDROID_JAR="$SDK/platforms/android-36/android.jar"
 OUT="$ROOT/build"
 KEYSTORE="${BLUE_MERIDIAN_KEYSTORE:-$HOME/.android/blue-meridian.jks}"
 KEYPASS="${BLUE_MERIDIAN_KEYPASS:-$HOME/.android/blue-meridian.pass}"
-VERSION_NAME="${VERSION_NAME:-1.0.0}"
-VERSION_CODE="${VERSION_CODE:-1}"
+VERSION_NAME="${VERSION_NAME:-1.0.1}"
+VERSION_CODE="${VERSION_CODE:-2}"
 SIGN_APK="${SIGN_APK:-true}"
 
 for tool in javac zip; do
@@ -53,6 +53,11 @@ javac -nowarn -Xlint:-options -source 8 -target 8 -bootclasspath "$ANDROID_JAR" 
 find "$OUT/classes" -name '*.class' > "$OUT/classes.txt"
 "$TOOLS/d8" --release --lib "$ANDROID_JAR" --min-api 23 --output "$OUT/dex" @"$OUT/classes.txt"
 (cd "$OUT/dex" && zip -q -j "$OUT/unsigned.apk" classes.dex)
+mkdir -p "$OUT/notices/assets"
+cp "$ROOT/NOTICE" "$OUT/notices/assets/NOTICE"
+cp "$ROOT/LICENSE" "$OUT/notices/assets/LICENSE"
+cp "$ROOT/assets/SOURCES.json" "$OUT/notices/assets/SOURCES.json"
+(cd "$OUT/notices" && zip -q "$OUT/unsigned.apk" assets/NOTICE assets/LICENSE assets/SOURCES.json)
 "$TOOLS/zipalign" -f 4 "$OUT/unsigned.apk" "$OUT/aligned.apk"
 if [[ "$SIGN_APK" == "true" ]]; then
   "$TOOLS/apksigner" sign --ks "$KEYSTORE" --ks-pass "file:$KEYPASS" --ks-key-alias blue-meridian \

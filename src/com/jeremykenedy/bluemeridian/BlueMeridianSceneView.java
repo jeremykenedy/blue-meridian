@@ -22,48 +22,64 @@ final class BlueMeridianSceneView extends GLSurfaceView {
     private static final float[] VERTICES = {-1f, -1f, 1f, -1f, -1f, 1f, 1f, 1f};
     private static final String VERTEX_SHADER =
             "attribute vec2 aPosition; varying vec2 vUv; void main(){vUv=aPosition*0.5+0.5;gl_Position=vec4(aPosition,0.0,1.0);}";
+    // Longitude derivatives must stay continuous when the repeating map wraps.
     private static final String FRAGMENT_SHADER =
             "precision highp float;" +
-            "varying vec2 vUv; uniform sampler2D uEarth; uniform float uTime; uniform float uAspect;" +
-            "uniform float uSpin; uniform float uCamera; uniform float uStars; uniform float uAtmosphere;" +
-            "uniform float uNightLights; uniform float uClouds;" +
+            "varying vec2 vUv;" +
+            "uniform sampler2D uEarth,uNight,uClouds;" +
+            "uniform float uTime,uAspect,uSpin,uCamera,uStars,uAtmosphere,uNightLights,uCloudsEnabled;" +
+            "\n#ifdef WRAPPED_MIPMAPS\n" +
+            "vec4 globeTexture(sampler2D image,vec2 uv){" +
+            "vec2 dx=dFdx(uv),dy=dFdy(uv);" +
+            "dx.x-=floor(dx.x+0.5);dy.x-=floor(dy.x+0.5);" +
+            "return texture2DGradEXT(image,uv,dx,dy);}" +
+            "\n#else\n" +
+            "vec4 globeTexture(sampler2D image,vec2 uv){return texture2D(image,uv);}" +
+            "\n#endif\n" +
             "float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123);}" +
-            "float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);" +
-            "return mix(mix(hash(i),hash(i+vec2(1.,0.)),f.x),mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),f.x),f.y);}" +
             "void main(){" +
-            "vec2 cell=floor(gl_FragCoord.xy/6.0);float star=hash(cell);" +
-            "float starShape=1.0-smoothstep(0.22,0.36,length(fract(gl_FragCoord.xy/6.0)-0.5));" +
+            "vec2 starPosition=gl_FragCoord.xy+vec2(uTime*0.14,uTime*0.08);vec2 cell=floor(starPosition/6.0);float star=hash(cell);" +
+            "float starShape=1.0-smoothstep(0.22,0.36,length(fract(starPosition/6.0)-0.5));" +
             "float field=step(0.9988-uStars*0.0018,star)*starShape;" +
-            "float twinkle=0.62+0.38*sin(uTime*1.6+star*60.0);" +
-            "vec3 color=vec3(0.012,0.020,0.045)+field*twinkle*vec3(0.52,0.66,0.86);" +
+            "float twinkle=0.72+0.28*sin(uTime*0.7+star*60.0);" +
+            "vec3 space=vec3(0.003,0.006,0.012)+field*twinkle*vec3(0.52,0.66,0.86);" +
             "float cx=0.51+sin(uTime*uCamera)*0.042;float cy=0.51+sin(uTime*uCamera*0.61+1.1)*0.018;" +
             "vec2 p=(vUv-vec2(cx,cy))*vec2(uAspect,1.0)/0.405;float r2=dot(p,p);" +
-            "if(r2>1.0){if(uAtmosphere>0.5){float d=sqrt(r2);float glow=1.0-smoothstep(1.005,1.075,d);" +
-            "color+=vec3(0.09,0.32,0.68)*glow*0.5;}gl_FragColor=vec4(color,1.0);return;}" +
-            "float nz=sqrt(max(0.0,1.0-r2));vec3 n=normalize(vec3(p.x,-p.y,nz));" +
+            "vec3 sun=normalize(vec3(-0.78,0.25,0.55));" +
+            "if(r2>1.0){float glow=1.0-smoothstep(1.0,1.026,sqrt(r2));" +
+            "vec3 limb=vec3(normalize(p),0.0);" +
+            "float sunlit=clamp(dot(limb,sun)+0.35,0.05,1.0);" +
+            "gl_FragColor=vec4(space+vec3(0.06,0.22,0.48)*glow*sunlit*uAtmosphere,1.0);return;}" +
+            "float nz=sqrt(max(0.0,1.0-r2));vec3 n=normalize(vec3(p.x,p.y,nz));" +
             "float angle=uTime*uSpin;float c=cos(angle),s=sin(angle);" +
-            "vec3 world=vec3(c*n.x+s*n.z,n.y,-s*n.x+c*n.z);" +
-            "float longitude=atan(world.x,world.z);float latitude=asin(clamp(world.y,-1.0,1.0));" +
-            "vec2 uv=vec2(fract(longitude/6.2831853+0.5),0.5-latitude/3.14159265);" +
-            "vec3 surface=texture2D(uEarth,uv).rgb;" +
-            "vec3 lightDir=normalize(vec3(-0.42,0.30,0.86));float day=max(dot(world,lightDir),0.0);" +
-            "float illumination=0.075+0.925*pow(day,0.72);" +
-            "float night=1.0-smoothstep(-0.18,0.13,day);" +
-            "float land=step(surface.b*1.08,surface.g)*step(0.11,surface.g);" +
-            "float city=step(0.993,noise(uv*vec2(145.0,72.0)));" +
-            "vec3 litSurface=surface*illumination;" +
-            "if(uClouds>0.5){vec2 cloudUv=uv*vec2(43.0,22.0)+vec2(uTime*0.018,-uTime*0.006);" +
-            "float cloud=0.55*noise(cloudUv)+0.30*noise(cloudUv*2.13)+0.15*noise(cloudUv*4.7);" +
-            "float cover=smoothstep(0.58,0.73,cloud);litSurface=mix(litSurface,vec3(0.82,0.89,0.94)*illumination,cover*0.48);}" +
-            "litSurface+=vec3(1.0,0.58,0.19)*city*land*night*uNightLights*0.74;" +
-            "float edge=pow(1.0-nz,3.2)*uAtmosphere;litSurface+=vec3(0.12,0.42,0.95)*edge*1.8;" +
-            "color=litSurface;gl_FragColor=vec4(color,1.0);}";
+            "vec3 body=vec3(c*n.x+s*n.z,n.y,-s*n.x+c*n.z);" +
+            "vec2 uv=vec2(fract(atan(body.x,body.z)/6.2831853+0.5),0.5-asin(clamp(body.y,-1.0,1.0))/3.14159265);" +
+            "vec3 surface=globeTexture(uEarth,uv).rgb;" +
+            "float signedDay=dot(n,sun);float day=max(signedDay,0.0);" +
+            "float illumination=0.035+1.25*pow(day,0.8);" +
+            "vec3 color=pow(surface,vec3(2.2))*illumination;" +
+            "float water=1.0-smoothstep(0.0,0.055,surface.g-surface.b*0.7);" +
+            "color+=vec3(0.0015,0.006,0.016)*water*day;vec3 halfway=normalize(sun+vec3(0.0,0.0,1.0));" +
+            "color+=vec3(0.78,0.88,1.0)*pow(max(dot(n,halfway),0.0),95.0)*water*0.16;" +
+            "vec2 cloudUv=vec2(fract(uv.x+uTime*0.00035),uv.y);" +
+            "float cloud=globeTexture(uClouds,cloudUv).r*uCloudsEnabled;" +
+            "float shadow=globeTexture(uClouds,cloudUv+sun.xy*0.003).r*uCloudsEnabled;" +
+            "color*=1.0-shadow*0.24;" +
+            "color=mix(color,vec3(0.93,0.96,1.0)*illumination,cloud*0.88);" +
+            "vec3 lights=globeTexture(uNight,uv).rgb;float emission=max(lights.r-lights.b*0.9,0.0);" +
+            "float night=1.0-smoothstep(-0.12,0.12,signedDay);" +
+            "color+=pow(lights,vec3(2.2))*emission*night*uNightLights*(1.0-cloud*0.8)*2.0;" +
+            "float rim=pow(1.0-nz,4.5)*uAtmosphere;" +
+            "color+=vec3(0.025,0.11,0.28)*rim*clamp(signedDay+0.45,0.06,1.0);" +
+            "color=pow(color,vec3(1.0/2.2));" +
+            "gl_FragColor=vec4(color,1.0);" +
+            "}";
     private final Handler handler = new Handler();
     private final FloatBuffer vertices = ByteBuffer.allocateDirect(VERTICES.length * 4)
             .order(ByteOrder.nativeOrder()).asFloatBuffer();
     private BlueMeridianOptions options;
     private int program;
-    private int texture;
+    private int[] textures;
     private int positionHandle;
     private long startedAt;
     private boolean running;
@@ -120,9 +136,19 @@ final class BlueMeridianSceneView extends GLSurfaceView {
         public void onSurfaceCreated(GL10 ignored, EGLConfig config) {
             GLES20.glClearColor(0.01f, 0.02f, 0.04f, 1f);
             GLES20.glDisable(GLES20.GL_DEPTH_TEST);
-            program = createProgram(VERTEX_SHADER, FRAGMENT_SHADER);
+            String extensions = " " + GLES20.glGetString(GLES20.GL_EXTENSIONS) + " ";
+            boolean wrappedMipmaps = extensions.contains(" GL_EXT_shader_texture_lod ")
+                    && extensions.contains(" GL_OES_standard_derivatives ");
+            String prefix = wrappedMipmaps
+                    ? "#extension GL_EXT_shader_texture_lod : enable\n"
+                            + "#extension GL_OES_standard_derivatives : enable\n"
+                            + "#define WRAPPED_MIPMAPS\n"
+                    : "";
+            program = createProgram(VERTEX_SHADER, prefix + FRAGMENT_SHADER);
             positionHandle = GLES20.glGetAttribLocation(program, "aPosition");
-            texture = loadEarthTexture();
+            textures = new int[] {loadTexture(R.drawable.earth_surface, wrappedMipmaps),
+                    loadTexture(R.drawable.earth_night, wrappedMipmaps),
+                    loadTexture(R.drawable.earth_clouds, wrappedMipmaps)};
         }
 
         @Override
@@ -139,9 +165,13 @@ final class BlueMeridianSceneView extends GLSurfaceView {
             vertices.position(0);
             GLES20.glEnableVertexAttribArray(positionHandle);
             GLES20.glVertexAttribPointer(positionHandle, 2, GLES20.GL_FLOAT, false, 0, vertices);
-            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture);
+            for (int unit = 0; unit < textures.length; unit++) {
+                GLES20.glActiveTexture(GLES20.GL_TEXTURE0 + unit);
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[unit]);
+            }
             uniform1i("uEarth", 0);
+            uniform1i("uNight", 1);
+            uniform1i("uClouds", 2);
             uniform1f("uTime", (SystemClock.uptimeMillis() - startedAt) / 1000f);
             uniform1f("uAspect", width / (float) height);
             uniform1f("uSpin", options.spinSpeed);
@@ -149,7 +179,7 @@ final class BlueMeridianSceneView extends GLSurfaceView {
             uniform1f("uStars", options.stars / 260f);
             uniform1f("uAtmosphere", options.atmosphere ? 1f : 0f);
             uniform1f("uNightLights", options.nightLights ? 1f : 0f);
-            uniform1f("uClouds", options.clouds ? 1f : 0f);
+            uniform1f("uCloudsEnabled", options.clouds ? 1f : 0f);
             GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
             GLES20.glDisableVertexAttribArray(positionHandle);
         }
@@ -163,18 +193,30 @@ final class BlueMeridianSceneView extends GLSurfaceView {
         }
     }
 
-    private int loadEarthTexture() {
+    private int loadTexture(int resource, boolean mipmaps) {
         BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
         decodeOptions.inScaled = false;
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.earth_surface, decodeOptions);
+        decodeOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeResource(getResources(), resource, decodeOptions);
+        int[] maximum = new int[1];
+        GLES20.glGetIntegerv(GLES20.GL_MAX_TEXTURE_SIZE, maximum, 0);
+        decodeOptions.inSampleSize = 1;
+        while (decodeOptions.outWidth / decodeOptions.inSampleSize > maximum[0]
+                || decodeOptions.outHeight / decodeOptions.inSampleSize > maximum[0]) {
+            decodeOptions.inSampleSize *= 2;
+        }
+        decodeOptions.inJustDecodeBounds = false;
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), resource, decodeOptions);
         int[] textures = new int[1];
         GLES20.glGenTextures(1, textures, 0);
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[0]);
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER,
+                mipmaps ? GLES20.GL_LINEAR_MIPMAP_LINEAR : GLES20.GL_LINEAR);
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_REPEAT);
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
         android.opengl.GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
+        if (mipmaps) GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);
         bitmap.recycle();
         return textures[0];
     }
